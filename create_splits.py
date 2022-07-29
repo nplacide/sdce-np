@@ -2,10 +2,11 @@ import argparse
 import glob
 import os
 import random
-
+import shutil 
 import numpy as np
 
 from utils import get_module_logger
+
 
 
 def split(source, destination):
@@ -17,7 +18,40 @@ def split(source, destination):
         - source [str]: source data directory, contains the processed tf records
         - destination [str]: destination data directory, contains 3 sub folders: train / val / test
     """
-    # TODO: Implement function
+    #get all tfrecord filenames from the source folder
+    dataset = glob.glob(source+'/*.tfrecord')
+    
+    #split the filenames where 80% goes for training, 10% for validation, 10% for testing
+    training_filenames, validation_filenames, test_filenames = np.split(dataset,[int(len(dataset)*0.8), int(len(dataset)*0.9)])
+    
+    #set destination folder for training files
+    training_folder_path = os.path.join(destination, 'train')
+    isExist = os.path.exists(training_folder_path)
+    if not isExist:
+        # Create a new directory because it does not exist 
+        os.makedirs(training_folder_path)
+    
+    #set destination folder for validation files
+    validation_folder_path = os.path.join(destination, 'val')
+    isExist = os.path.exists(validation_folder_path)
+    if not isExist:
+        # Create a new directory because it does not exist 
+        os.makedirs(validation_folder_path)
+        
+    #set destination folder for test files
+    test_folder_path = os.path.join(destination, 'test')
+    if not isExist:
+        # Create a new directory because it does not exist 
+        os.makedirs(test_folder_path)
+    
+    #iterate through the filenames and move each file to its destination
+    for filename in training_filenames:
+        shutil.move(source+f'/{os.path.basename(filename)}', training_folder_path+f'/{os.path.basename(filename)}')
+    for filename in validation_filenames:
+        shutil.move(source+f'/{os.path.basename(filename)}', validation_folder_path+f'/{os.path.basename(filename)}')
+    for filename in test_filenames:
+        shutil.move(source+f'/{os.path.basename(filename)}', test_folder_path+f'/{os.path.basename(filename)}')
+    
 
 
 if __name__ == "__main__":
